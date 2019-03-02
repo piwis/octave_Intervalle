@@ -116,7 +116,6 @@
                 </p>
             </div>
             <div v-else key="2" class="lets-go">
-
                 <p class="bold">
                     Parfait, tu sais tout !
                 </p>
@@ -139,20 +138,22 @@
 
 <script>
 
+    import {AudioData} from "../utils/AudioData";
     export default {
         name: 'understand-introduction-view',
 
         data() {
             return {
-                show: false,
+                show: true,
                 //startIntroduction: false,
             }
         },
 
         sockets: {
 
-
             understandIntroduction: function (data) {
+                this.$root.$emit("stopSound", AudioData.SOUND.DIRIGER)
+                this.$root.$emit("playSound", AudioData.SOUND.PARFAIT)
                 this.show = false
                 setTimeout(() => {
                     this.$router.push('choose-landscape')
@@ -165,6 +166,7 @@
 
         mounted() {
 
+            this.$root.$emit("playSound", AudioData.SOUND.DIRIGER)
 
         }
 
@@ -174,30 +176,30 @@
 
 <style scoped lang="scss">
     .text {
-        font-size: 25px;
+        font-size: 30px;
         color: #085724;
         margin-top: 60px;
     }
 
     .content {
         margin-bottom: 60px;
-        font-size: 25px;
+        font-size: 30px;
         color: #085724;
         .bold {
             display: block;
-            font-size: 30px;
+            font-size: 50px;
         }
-        line-height: 40px;
+        line-height: 50px;
     }
 
     .lets-go {
         p {
-            font-size: 25px;
+            font-size: 30px;
             color: #085724;
             margin: 0;
             &.bold {
                 display: block;
-                font-size: 40px;
+                font-size: 50px;
             }
             &.ligth {
                 margin-bottom: 80px;

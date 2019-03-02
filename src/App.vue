@@ -7,15 +7,18 @@
             </transition>
         </main>
         <Background/>
+        <AudioPlayer/>
     </div>
 </template>
 
 <script>
     import Background from '@/components/Background'
+    import AudioPlayer from '@/components/AudioPlayer'
     export default {
         name: 'app',
         components: {
             'Background': Background,
+            'AudioPlayer': AudioPlayer,
         },
         mounted() {
         }
@@ -48,6 +51,11 @@
         width: 100%;
         height: 100vh;
         overflow: hidden;
+        > div {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
     }
 
     main > div {
@@ -103,5 +111,19 @@
 
     .bold {
         @include f-muli-bold;
+    }
+
+    .content-bottom {
+        ;
+    }
+    .fz-25 {
+        font-size: 30px;
+        line-height: 40px;
+    }
+    .fz-40 {
+        font-size: 40px;
+    }
+    main {
+        /*background: mediumpurple;*/
     }
 </style>

@@ -1,39 +1,39 @@
 <template>
     <div class="qrcode">
-        <div>
-            <transition name="fade" mode="out-in">
-                <div v-if="show" class="qrcode-intro">
-                    <p class="title light">
-                        Scanner le QR Code avec ton smartphone
-                        <span class="bold">
+        <transition name="fade" mode="out-in">
+            <div key="1" v-if="show" class="qrcode-intro">
+                <p class="title light">
+                    Scanner le QR Code avec ton smartphone
+                    <span class="bold">
                     pour réveiller Octave !
                 </span>
-                    </p>
-                    <div class="canvas">
-                        <canvas id="canvas"></canvas>
-                    </div>
+                </p>
+                <div class="canvas">
+                    <canvas id="canvas"></canvas>
                 </div>
-                <div class="qrcode-reveille">
+            </div>
+            <div key="2" v-else class="qrcode-reveille">
                     <span class="qrcode-reveille-title light">
                         Octave s'éveille.
                     </span>
 
-                    <p>
+                <p>
                         <span class="bold">
                             C'est ici qu'il va te parler
                         </span>
-                        <span class="light">
+                    <span class="light">
                             et tu peux lui répondre grace à ton smarthphone
                         </span>
-                    </p>
+                </p>
 
-                </div>
-            </transition>
-        </div>
+            </div>
+        </transition>
     </div>
 </template>
 
 <script>
+
+    import {ColorData} from "../utils/ColorData";
 
     var QRCode = require('qrcode');
 
@@ -53,7 +53,9 @@
                  */
                 this.$socket.emit("clientTv", true)
             },
-            useHeadPhone:function() {
+            useHeadPhone: function () {
+                this.$root.$emit('transitionBackground', ColorData.COLOR.RED);
+                this.$root.$emit('onTuto', true)
                 this.$router.push('headphone')
             },
 
@@ -118,6 +120,7 @@
         }
         &-intro {
             .title {
+                color: #0F005F;
                 position: absolute;
                 top: 40px;
                 left: 50%;
@@ -138,12 +141,24 @@
             }
         }
     }
+
     .canvas {
         #canvas {
             width: 250px !important;
             height: 250px !important;
         }
         position: relative;
+    }
+    .fade-enter-active,
+    .fade-leave-active {
+        transition-duration: 0.3s;
+        transition-property: opacity;
+        transition-timing-function: ease;
+    }
+
+    .fade-enter,
+    .fade-leave-active {
+        opacity: 0
     }
 
 

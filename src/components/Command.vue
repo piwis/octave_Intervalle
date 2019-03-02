@@ -86,7 +86,6 @@
                   fill="black"/>
         </svg>
 
-
         <transition name="fade" mode="out-in">
             <div class="fatigue" v-show="back">
                 <p>
@@ -102,6 +101,7 @@
 
 
     import BackDrone from '@/components/BackDrone'
+    import {AudioData} from "../utils/AudioData";
 
     export default {
         name: 'choose-an-landscape',

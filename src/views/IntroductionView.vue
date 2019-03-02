@@ -32,7 +32,6 @@
 
         sockets: {
             useHeadPhone:function() {
-                alert('Salut')
                 this.$router.push('headphone')
             }
 

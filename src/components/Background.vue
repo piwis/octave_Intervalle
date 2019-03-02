@@ -1,18 +1,10 @@
 <template>
     <div class="background-vue">
-        <div v-if="transitionBg" class="start-animation">
-            <span :class="{ 'class-a': transitionBg, 'bg-transition blue' : true } "></span>
-            <span class="bg-transition red transition-blue"></span>
-        </div>
-        <div v-else class="add-class">
-            <span :class="{ 'class-a': transitionBg, 'bg-transition red' : true } "></span>
-            <span class="bg-transition blue transition-red"></span>
-        </div>
-			<transition-group name="fade" mode="out-in">
-				<span class="circle" v-bind:key="1" v-show="displayCircle">
+        <transition-group name="fade" mode="out-in">
+				<span class="circle" key="1" v-if="displayCircle">
 				</span>
-				<span class="circle-animation" v-show="rotationCircle" v-bind:key="2">
-					<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+            	<span key="2" class="circle-animation" v-if="rotationCircle">
+					<svg version="1.1" class="circle-bg" id="circle1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 		 viewBox="0 0 1228.7 1217.7" style="enable-background:new 0 0 1228.7 1217.7;" xml:space="preserve">
 			<g>
 		<defs>
@@ -29,7 +21,7 @@
 			C1221,539.8,1228.7,575,1228.7,608.8"/>
 	</g>
 	</svg>
-				<svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+				<svg version="1.1" class="circle-bg" id="circle2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 		 viewBox="0 0 1228.7 1217.7" style="enable-background:new 0 0 1228.7 1217.7;" xml:space="preserve">
 	<g>
 		<defs>
@@ -47,18 +39,22 @@
 	</g>
 	</svg>
 				</span>
-			</transition-group>
+        </transition-group>
     </div>
 </template>
 
 <script>
+
+    import * as THREE from 'three';
+    import {TweenMax} from "gsap"
+    import imgSmoke from "../assets/img/smoke.png"
     export default {
         name: 'background-vue',
         data() {
             return {
                 transitionBg: true,
                 rotationCircle: false,
-				displayCircle:true,
+                displayCircle: true,
                 img: null,
                 mask: null,
                 canvasTransition: null,
@@ -85,115 +81,254 @@
             lookAtScreen: function () {
                 document.querySelector(".circle").classList.add("active")
             },
-            useHeadPhone: function () {
-                this.rotationCircle = true;
-            },
         },
         methods: {
+
+            init() {
+                this.clock = new THREE.Clock();
+                this.renderer = new THREE.WebGLRenderer({alpha: true, antialias: false});
+                this.renderer.setClearColor(0xFFFFFF, 1.0);
+                this.oldColor = 0xFEF4EB;
+                // this.renderer.setClearColor(0xb9e3c3, 1);
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+                this.scene = new THREE.Scene();
+
+                this.ambientLight = new THREE.AmbientLight(0xB8B0FD);
+                this.scene.add(this.ambientLight);
+
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+                this.camera.position.z = 1000;
+                this.scene.add(this.camera);
+
+                //scene.add( mesh );
+                this.cubeSineDriver = 0;
+
+                THREE.ImageUtils.crossOrigin = ''; //Need this to pull in crossdomain images from AWS
+
+                var smokeTexture = THREE.ImageUtils.loadTexture(imgSmoke);
+                this.smokeMaterial = new THREE.MeshLambertMaterial({
+                    color: 0xB8B0FD,
+                    opacity: 1.0,
+                    map: smokeTexture,
+                    side: THREE.FrontSide,
+                    transparent: true,
+                });
+                this.smokeLigthMaterial = new THREE.MeshLambertMaterial({
+                    color: 0xCEDDFE,
+                    opacity: .70,
+                    side: THREE.FrontSide,
+                    map: smokeTexture,
+                    transparent: true
+                });
+
+                var smokeGeo = new THREE.PlaneGeometry(600, 600);
+
+                this.smokeParticles = [];
+                this.smokeParticlesLigth = [];
+
+                // Coté
+                for (var p = 0; p < 20; p++) {
+                    var particle = new THREE.Mesh(smokeGeo, this.smokeMaterial);
+                    particle.scale.x = 600;
+                    particle.scale.y = 600
+
+                    particle.scale.set(1, 1, 1);
+
+                    let posX = 0;
+                    let posY = 0;
+                    let posZ = 0;
+
+                    let w = window.innerWidth
+                    let h = window.innerHeight
+
+                    // BON POUR LES PLACEMENT
+
+                    // X Va vers la droite en positif
+                    // Y Va vers la haut en positif
+                    // Z Profondeur
+                    particle.position.set(Math.random() * 500 - 250, Math.random() * 500 - 250, Math.random() * 1000 - 100);
+                    particle.rotation.z = Math.random() * 360;
+                    this.scene.add(particle);
+                    this.smokeParticles.push(particle);
+                }
+                for (var p = 0; p < 3; p++) {
+                    var particle = new THREE.Mesh(smokeGeo, this.smokeLigthMaterial);
+                    particle.scale.x = 600;
+                    particle.scale.y = 600
+
+                    particle.scale.set(1, 1, 1);
+
+                    let posX = 0;
+                    let posY = 0;
+                    let posZ = 0;
+
+                    let w = window.innerWidth
+                    let h = window.innerHeight
+
+                    // BON POUR LES PLACEMENT
+                    if(p === 0) {
+                        posX = 0
+                        posY = -100
+
+                    } else if(p === 1) {
+                        posX = 200
+                        posY = -100
+
+                    } else if(p === 2) {
+                        posX = -200
+                        posY = -100
+                    }
+
+                    // X Va vers la droite en positif
+                    // Y Va vers la haut en positif
+                    // Z Profondeur
+                    particle.position.set(posX, posY, 800);
+                    particle.rotation.z = 600;
+                    // particle.position.set(Math.random() * 500 - 250, Math.random() * 500 - 250, Math.random() * 1000 - 100);
+                    // particle.rotation.z = Math.random() * 360;
+                    this.scene.add(particle);
+                    this.smokeParticlesLigth.push(particle);
+                }
+
+                // MILIEUX
+
+
+                document.querySelector(".background-vue").appendChild(this.renderer.domElement);
+
+                window.addEventListener("resize", this.onWindowResize.bind(this));
+                this.animate()
+            },
+            animate() {
+                this.delta = this.clock.getDelta();
+                requestAnimationFrame(this.animate.bind(this));
+                this.evolveSmoke();
+                this.render();
+
+            },
+            evolveSmoke() {
+                var sp = this.smokeParticles.length;
+                while (sp--) {
+                    this.smokeParticles[sp].rotation.z += Math.random() * (this.delta * 0.06);
+                }
+                var sp = this.smokeParticlesLigth.length;
+                while (sp--) {
+                    this.smokeParticlesLigth[sp].rotation.z += Math.random() * (this.delta * 0.06);
+                }
+            },
+            render() {
+                this.renderer.render(this.scene, this.camera);
+            },
+            onWindowResize() {
+                // Update canvas renderer size
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+                // Resize camera aspect
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+
+            },
 
             activeRotation() {
                 this.rotation = !this.rotation;
             },
             hiddenCircle() {
 
-			}
-            // init() {
-            //     this.clock = new THREE.Clock();
-            //     this.renderer = new THREE.WebGLRenderer({ alpha: true,antialias: false });
-            //     // this.renderer.setClearColor(0x1d1a19, 1);
-            //     this.renderer.setSize(window.innerWidth, window.innerHeight);
-            //
-            //     this.scene = new THREE.Scene();
-            //
-            //     var ambientLight = new THREE.AmbientLight(0xccc2ae);
-            //     this.scene.add(ambientLight);
-            //
-            //     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-            //     this.camera.position.z = 1000;
-            //     this.scene.add(this.camera);
-            //
-            //     this.geometry = new THREE.CubeGeometry(200, 200, 200);
-            //     this.material = new THREE.MeshLambertMaterial({
-            //         color: 0xaaa466,
-            //         wireframe: false
-            //     });
-            //     this.mesh = new THREE.Mesh(this.geometry, this.material);
-            //     //scene.add( mesh );
-            //     this.cubeSineDriver = 0;
-            //
-            //     var textGeo = new THREE.PlaneGeometry(300, 300);
-            //     THREE.ImageUtils.crossOrigin = ''; //Need this to pull in crossdomain images from AWS
-            //     var textTexture = THREE.ImageUtils.loadTexture('https://s3-us-west-2.amazonaws.com/s.cdpn.io/95637/quickText.png');
-            //     var textMaterial = new THREE.MeshLambertMaterial({
-            //         color: 0x00ffff,
-            //         opacity: 1,
-            //         map: textTexture,
-            //         transparent: true,
-            //         blending: THREE.AdditiveBlending
-            //     })
-            //     var text = new THREE.Mesh(textGeo, textMaterial);
-            //     text.position.z = 800;
-            //     // scene.add(text);
-            //
-            //     // light = new THREE.DirectionalLight(0xffffff,0.5);
-            //     // light.position.set(-1,0,1);
-            //     // scene.add(light);
-            //
-            //     var smokeTexture = THREE.ImageUtils.loadTexture('https://s3-us-west-2.amazonaws.com/s.cdpn.io/95637/Smoke-Element.png');
-            //     var smokeMaterial = new THREE.MeshLambertMaterial({
-            //         color: 0x937268,
-            //         opacity: 0.2,
-            //         map: smokeTexture,
-            //         transparent: true
-            //     });
-            //     var smokeGeo = new THREE.PlaneGeometry(300, 300);
-            //     this.smokeParticles = [];
-            //
-            //     for (var p = 0; p < 150; p++) {
-            //         var particle = new THREE.Mesh(smokeGeo, smokeMaterial);
-            //         particle.position.set(Math.random() * 500 - 250, Math.random() * 500 - 250, Math.random() * 1000 - 100);
-            //         particle.rotation.z = Math.random() * 360;
-            //         this.scene.add(particle);
-            //         this.smokeParticles.push(particle);
-            //     }
-            //
-            //     document.querySelector(".background-vue").appendChild(this.renderer.domElement);
-            //     this.animate()
-            // },
-            // animate() {
-            //     this.delta = this.clock.getDelta();
-            //     requestAnimationFrame(this.animate.bind(this));
-            //     this.evolveSmoke();
-            //     this.render();
-            //
-            // },
-            // evolveSmoke() {
-            //     var sp = this.smokeParticles.length;
-            //     while (sp--) {
-            //         this.smokeParticles[sp].rotation.z += (this.delta * 0.2);
-            //     }
-            // },
-            // render() {
-            //     this.mesh.rotation.x += 0.005;
-            //     this.mesh.rotation.y += 0.01;
-            //     this.cubeSineDriver += .01;
-            //     this.mesh.position.z = 100 + (Math.sin(this.cubeSineDriver) * 500);
-            //     this.renderer.render(this.scene, this.camera);
-            //
-            // }
+            },
+            init() {
+                this.clock = new THREE.Clock();
+                this.renderer = new THREE.WebGLRenderer({ alpha: true,antialias: false });
+                // this.renderer.setClearColor(0x1d1a19, 1);
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+                this.scene = new THREE.Scene();
+
+                this.ambientLight = new THREE.AmbientLight(0xB8B0FD);
+                this.scene.add(this.ambientLight);
+
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+                this.camera.position.z = 1000;
+                this.scene.add(this.camera);
+                //scene.add( mesh );
+
+
+                var smokeTexture = THREE.ImageUtils.loadTexture(imgSmoke);
+                this.smokeMaterial = new THREE.MeshLambertMaterial({
+                    color: 0xB8B0FD,
+                    opacity: 1.0,
+                    map: smokeTexture,
+                    transparent: true
+                });
+                var smokeGeo = new THREE.PlaneGeometry(500, 500);
+                this.smokeParticles = [];
+
+                for (var p = 0; p < 40; p++) {
+                    var particle = new THREE.Mesh(smokeGeo, this.smokeMaterial);
+                    particle.position.set(Math.random() * 500 - 250, Math.random() * 500 - 250, Math.random() * 1000 - 100);
+                    particle.rotation.z = Math.random() * 360;
+                    this.scene.add(particle);
+                    this.smokeParticles.push(particle);
+                }
+
+                document.querySelector(".background-vue").appendChild(this.renderer.domElement);
+                this.animate()
+            },
+            animate() {
+                this.delta = this.clock.getDelta();
+                requestAnimationFrame(this.animate.bind(this));
+                this.evolveSmoke();
+                this.render();
+
+            },
+            evolveSmoke() {
+                var sp = this.smokeParticles.length;
+                while (sp--) {
+                    this.smokeParticles[sp].rotation.z += (this.delta * 0.2);
+                }
+            },
+            render() {
+                this.renderer.render(this.scene, this.camera);
+            },
+            changeColorOfMaterial(color) {
+
+                TweenMax.to([this.smokeMaterial.color], 1, {
+                    r: color.r,
+                    g: color.g,
+                    b: color.b,
+                })
+            }
+
         },
         mounted() {
 
+            this.init();
+
             this.$root.$on('bg', (data) => {
-                console.log("Salut");
                 this.transitionBg = !this.transitionBg;
-                setTimeout(() => {
-                    document.querySelector(".add-class").classList.add('start-animation')
-                }, 100)
+            })
+
+            this.$root.$on('transitionBackground', (data) => {
+                this.changeColorOfMaterial(data);
             })
 
             this.$root.$on('onTuto', (data) => {
-                this.displayCircle = false
+                console.log(data);
+                if(data) {
+                    this.rotationCircle = true;
+                    setTimeout(() => {
+                        document.querySelector(".circle").classList.add('start-animation')
+                    }, 100)
+                } else {
+                    this.rotationCircle = false;
+                    document.querySelector(".circle").classList.remove('start-animation')
+                }
+            });
+            this.$root.$on('displayCircle', (data) => {
+                if(data) {
+                    this.displayCircle = true
+                } else {
+                    this.displayCircle = false
+                }
             });
 
 
@@ -298,12 +433,17 @@
         -ms-transition: transform 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
         -o-transition: transform 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
         transition: transform 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
-        height: 130vh;
+        height: 120vh;
         width: 120vh;
         will-change: transform;
         border-radius: 100%;
         background: rgba(255, 255, 255, 0.6);
     }
+
+	.circle-bg {
+		width: 100%;
+
+	}
 
     .st0 {
         clip-path: url(#SVGID_2_);
@@ -311,17 +451,21 @@
     }
 
     svg {
-        opacity: 0.4;
+        opacity: 0.3;
         position: absolute;
-        left: -5%;
-        top: -5%;
-        width: 110%;
-        height: 110%;
+		left: 0;
+		top: -13%;
+        width: 126%;
+        height: 126%;
         transform-origin: center;
-        animation: rotate 50s infinite; /* IE 10+, Fx 29+ */
-        animation-timing-function: linear;
-        &:nth-of-type(2) {
-            animation-delay: 10s;
+
+        &:nth-of-type(1) {
+			animation: rotate 60s infinite; /* IE 10+, Fx 29+ */
+			animation-timing-function: linear;
+        }
+		&:nth-of-type(2) {
+			animation: rotate 80s infinite; /* IE 10+, Fx 29+ */
+			animation-timing-function: linear;
         }
         @keyframes rotate {
             0% {

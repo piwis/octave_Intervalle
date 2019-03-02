@@ -1,7 +1,6 @@
 <template>
     <div class="headphone">
-        <div class="second-introduction">
-
+        <div class="second-introduction content-bottom">
 			<div class="title">
 				<span class="light">
 					Bonjour, je m'apelle
@@ -63,14 +62,14 @@
 		c0-0.2-0.1-0.4-0.3-0.6L835.5,158.7z"/>
 </g>
 </svg>
-
-
 		</div>
     </div>
 </template>
 
 <script>
 
+
+    import {AudioData} from "../utils/AudioData";
 
     export default {
         name: 'headPhone-view',
@@ -118,17 +117,24 @@
 	svg {
 		max-width: 600px;
 	}
-	.title {
-		font-size: 40px;
-		margin-bottom: 50px;
-		.bold {
-			display: block;
+
+	.second-introduction {
+		.title {
+			color: #3a0000;
+			font-size: 30px;
+			margin-bottom: 60px;
+
+			.bold {
+				font-size: 50px!important;
+				display: block;
+			}
 		}
-	}
-	.content {
-		font-size: 25px;
-		margin-bottom: 60px;
-		
+		.content {
+			color: #3a0000;
+			font-size: 30px;
+			margin-bottom: 100px;
+
+		}
 	}
 	.st0{fill:none;}
 	.st1{fill:#FF7A81;}

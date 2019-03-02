@@ -21,7 +21,6 @@ export class AudioHelper {
         console.log('start ' + src);
         let AudioContext = new Audio(src);
         this.fromToVolume(AudioContext, options.volume.from, options.volume.to, options.volume.duration);
-        AudioContext.play();
         AudiosContextPlaying[src] = AudioContext;
         if (typeof options.onStart !== "undefined") this.eval(AudioContext, false, options.onStart);
         if (typeof options.onFinish !== "undefined") this.eval(AudioContext, 'ended', options.onFinish);
