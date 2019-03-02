@@ -3,7 +3,7 @@
         <transition-group name="fade" mode="out-in">
 				<span class="circle" key="1" v-if="displayCircle">
 				</span>
-            	<span key="2" class="circle-animation" v-if="rotationCircle">
+            <span key="2" class="circle-animation" v-if="rotationCircle">
 					<svg version="1.1" class="circle-bg" id="circle1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 		 viewBox="0 0 1228.7 1217.7" style="enable-background:new 0 0 1228.7 1217.7;" xml:space="preserve">
 			<g>
@@ -88,7 +88,6 @@
                 this.clock = new THREE.Clock();
                 this.renderer = new THREE.WebGLRenderer({alpha: true, antialias: false});
                 this.renderer.setClearColor(0xFFFFFF, 1.0);
-                this.oldColor = 0xFEF4EB;
                 // this.renderer.setClearColor(0xb9e3c3, 1);
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -234,60 +233,6 @@
             },
             hiddenCircle() {
 
-            },
-            init() {
-                this.clock = new THREE.Clock();
-                this.renderer = new THREE.WebGLRenderer({ alpha: true,antialias: false });
-                // this.renderer.setClearColor(0x1d1a19, 1);
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-
-                this.scene = new THREE.Scene();
-
-                this.ambientLight = new THREE.AmbientLight(0xB8B0FD);
-                this.scene.add(this.ambientLight);
-
-                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
-                this.camera.position.z = 1000;
-                this.scene.add(this.camera);
-                //scene.add( mesh );
-
-
-                var smokeTexture = THREE.ImageUtils.loadTexture(imgSmoke);
-                this.smokeMaterial = new THREE.MeshLambertMaterial({
-                    color: 0xB8B0FD,
-                    opacity: 1.0,
-                    map: smokeTexture,
-                    transparent: true
-                });
-                var smokeGeo = new THREE.PlaneGeometry(500, 500);
-                this.smokeParticles = [];
-
-                for (var p = 0; p < 40; p++) {
-                    var particle = new THREE.Mesh(smokeGeo, this.smokeMaterial);
-                    particle.position.set(Math.random() * 500 - 250, Math.random() * 500 - 250, Math.random() * 1000 - 100);
-                    particle.rotation.z = Math.random() * 360;
-                    this.scene.add(particle);
-                    this.smokeParticles.push(particle);
-                }
-
-                document.querySelector(".background-vue").appendChild(this.renderer.domElement);
-                this.animate()
-            },
-            animate() {
-                this.delta = this.clock.getDelta();
-                requestAnimationFrame(this.animate.bind(this));
-                this.evolveSmoke();
-                this.render();
-
-            },
-            evolveSmoke() {
-                var sp = this.smokeParticles.length;
-                while (sp--) {
-                    this.smokeParticles[sp].rotation.z += (this.delta * 0.2);
-                }
-            },
-            render() {
-                this.renderer.render(this.scene, this.camera);
             },
             changeColorOfMaterial(color) {
 
@@ -440,10 +385,10 @@
         background: rgba(255, 255, 255, 0.6);
     }
 
-	.circle-bg {
-		width: 100%;
+    .circle-bg {
+        width: 100%;
 
-	}
+    }
 
     .st0 {
         clip-path: url(#SVGID_2_);
@@ -453,19 +398,19 @@
     svg {
         opacity: 0.3;
         position: absolute;
-		left: 0;
-		top: -13%;
+        left: 0;
+        top: -13%;
         width: 126%;
         height: 126%;
         transform-origin: center;
 
         &:nth-of-type(1) {
-			animation: rotate 60s infinite; /* IE 10+, Fx 29+ */
-			animation-timing-function: linear;
+            animation: rotate 60s infinite; /* IE 10+, Fx 29+ */
+            animation-timing-function: linear;
         }
-		&:nth-of-type(2) {
-			animation: rotate 80s infinite; /* IE 10+, Fx 29+ */
-			animation-timing-function: linear;
+        &:nth-of-type(2) {
+            animation: rotate 80s infinite; /* IE 10+, Fx 29+ */
+            animation-timing-function: linear;
         }
         @keyframes rotate {
             0% {

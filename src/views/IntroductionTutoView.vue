@@ -224,6 +224,7 @@
             margin-bottom: 80px;
         }
         &-exit {
+            max-width: 400px;
             visibility: hidden;
             opacity: 0;
             bottom: 20px;
